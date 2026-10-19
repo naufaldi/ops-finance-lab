@@ -22,7 +22,7 @@ api.get("/claims", requireScope("claims:read"), async (c) => {
 api.post("/claims", requireScope("claims:write"), async (c) => {
   const body = await c.req.json<Record<string, unknown>>().catch(() => ({}));
   const r = await claimService(c.env).create(c.get("user"), body);
-  if (!r.ok) return c.json({ error: r.error }, r.code);
+  if (!r.ok) return c.json({ error: r.error, ...r.limit }, r.code);
   return c.json({ claim: r.value }, 201);
 });
 

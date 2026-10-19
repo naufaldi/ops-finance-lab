@@ -44,4 +44,25 @@ export class D1ClaimRepository implements ClaimRepository {
   async setReceiptKey(id: number, key: string) {
     await this.db.prepare("UPDATE claims SET receipt_key = ? WHERE id = ?").bind(key, id).run();
   }
+
+  async monthlyTotal(q: { userId: number; category: string; month: string; excludeId?: number }) {
+    const row = await this.db.prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM claims
+       WHERE user_id = ? AND category = ? AND status != 'rejected' AND substr(claim_date, 1, 7) = ? AND id != ?`,
+    ).bind(q.userId, q.category, q.month, q.excludeId ?? 0).first<{ total: number }>();
+    return row?.total ?? 0;
+  }
+
+  async monthlyTotals(userId: number, month: string) {
+    const { results } = await this.db.prepare(
+      `SELECT category, SUM(amount) AS total FROM claims
+       WHERE user_id = ? AND status != 'rejected' AND substr(claim_date, 1, 7) = ? GROUP BY category`,
+    ).bind(userId, month).all<{ category: string; total: number }>();
+    return Object.fromEntries(results.map((r) => [r.category, r.total]));
+  }
+
+  async limits() {
+    const { results } = await this.db.prepare("SELECT category, monthly_limit FROM claim_limits").bind().all<{ category: string; monthly_limit: number }>();
+    return Object.fromEntries(results.map((r) => [r.category, r.monthly_limit]));
+  }
 }
