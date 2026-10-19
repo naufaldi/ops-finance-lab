@@ -39,6 +39,7 @@ Query total (satu statement):
 ## 4. Non-functional
 - Uang: `INTEGER` rupiah. Tanpa float.
 - Dua klaim bersamaan bisa sama-sama lolos cek (race). Diterima untuk versi lab; dicatat sebagai risiko.
+  Opsi produksi: cek dan insert dalam satu statement (`INSERT ... SELECT ... WHERE total + ? <= limit`), atau batch D1.
 - Perilaku lama dikunci characterization test sebelum refactor.
 
 ## 5. Rencana bertahap
