@@ -9,7 +9,8 @@
     "test": "vitest run",
     "deploy": "wrangler deploy",
     "lint:arch": "node scripts/check-architecture.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check": "npm test && npm run lint:arch && tsc --noEmit -p ."
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.3.1",
