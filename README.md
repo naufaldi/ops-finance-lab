@@ -1,6 +1,12 @@
-# ops-finance (solusi lengkap, untuk trainer)
+# ops-finance
 
-Aplikasi klaim biaya Ops Sales untuk Lab Sesi 2 (Bagian G). Data dummy.
+Aplikasi klaim biaya Ops Sales untuk lab Sesi 2 dan Sesi 3. Data dummy.
+
+## Branch
+- `main`: starter Lab Sesi 2 (Bagian G)
+- `solution`: hasil akhir Lab Sesi 2
+- `sesi3-start`: titik awal Lab Sesi 3 Part 1 (= `solution` + helper test `test/helpers/env.ts`)
+- `sesi3-part1-solution`: hasil Lab Sesi 3 Part 1 (PRD, ARCHITECTURE, TRD, ADR, refactor claims ke layer)
 Diuji 19 Okt 2026: Node 22.22, wrangler 4.151, hono 4.13, @modelcontextprotocol/server 2.3.1, Claude Code 2.1.303.
 
 ## Jalankan
