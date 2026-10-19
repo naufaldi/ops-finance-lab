@@ -1,0 +1,11 @@
+{
+  "name": "ops-finance",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-10-01",
+  "d1_databases": [
+    { "binding": "DB", "database_name": "ops-finance", "database_id": "local-dev" }
+  ],
+  "r2_buckets": [
+    { "binding": "RECEIPTS", "bucket_name": "ops-finance-receipts" }
+  ]
+}
