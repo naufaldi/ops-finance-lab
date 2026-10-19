@@ -6,12 +6,13 @@ export class D1ClaimRepository implements ClaimRepository {
   constructor(private readonly db: D1Database) {}
 
   async list(filter: { userId?: number; status?: string; limit?: number }): Promise<ClaimListItem[]> {
-    let sql = "SELECT c.*, u.name AS sales FROM claims c JOIN users u ON u.id = c.user_id WHERE 1 = 1";
+    let sql = "SELECT c.id, c.user_id, c.category, c.amount, c.claim_date, c.merchant, c.status, u.name AS sales FROM claims c JOIN users u ON u.id = c.user_id WHERE 1 = 1";
     const params: unknown[] = [];
     if (filter.userId !== undefined) { sql += " AND c.user_id = ?"; params.push(filter.userId); }
     if (filter.status) { sql += " AND c.status = ?"; params.push(filter.status); }
     sql += " ORDER BY c.claim_date DESC, c.id DESC";
     if (filter.limit) { sql += " LIMIT ?"; params.push(filter.limit); }
+    // Kolom eksplisit: lebih hemat daripada c.*
     const { results } = await this.db.prepare(sql).bind(...params).all<ClaimListItem>();
     return results;
   }
