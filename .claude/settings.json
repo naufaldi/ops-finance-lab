@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "mcp__ops-finance__list_my_claims",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "Bash(npm run lint:arch)"
     ],
     "ask": [
       "mcp__ops-finance__create_claim",
@@ -11,6 +12,19 @@
     "deny": [
       "Read(./.dev.vars)",
       "Bash(npx wrangler * --remote *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run -s lint:arch 1>&2 || exit 2"
+          }
+        ]
+      }
     ]
   }
 }
