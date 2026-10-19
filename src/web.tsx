@@ -2,7 +2,8 @@ import { Hono } from "hono";
 import type { Child } from "hono/jsx";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { hashPassword, randomToken, requireSession, sha256, type AppEnv } from "./auth";
-import { CATEGORIES, validateClaim } from "./validate";
+import { claimService } from "./claims";
+import { CATEGORIES } from "./claims/claim";
 
 export const web = new Hono<AppEnv>();
 
@@ -86,13 +87,7 @@ web.use("/receipts/*", requireSession);
 // Daftar klaim: admin melihat semua, sales hanya miliknya
 web.get("/", async (c) => {
   const user = c.get("user");
-  const status = c.req.query("status") ?? "";
-  let sql = `SELECT c.*, u.name AS sales FROM claims c JOIN users u ON u.id = c.user_id WHERE 1 = 1`;
-  const params: unknown[] = [];
-  if (user.role !== "admin") { sql += " AND c.user_id = ?"; params.push(user.id); }
-  if (status) { sql += " AND c.status = ?"; params.push(status); }
-  sql += " ORDER BY c.claim_date DESC, c.id DESC";
-  const { results } = await c.env.DB.prepare(sql).bind(...params).all<Record<string, any>>();
+  const results = await claimService(c.env).list(user, c.req.query("status"));
   const total = results.reduce((s, r) => s + (r.status !== "rejected" ? r.amount : 0), 0);
   return c.html(
     <Page title="Klaim" user={user}>
@@ -147,53 +142,40 @@ function ClaimForm(props: { action: string; v?: Record<string, any>; error?: str
 web.get("/claims/new", (c) => c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" button="Simpan" /></Page>));
 web.post("/claims/new", async (c) => {
   const f = await c.req.parseBody() as Record<string, unknown>;
-  const v = validateClaim(f);
-  if (!v.ok) return c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" v={f} error={v.error} button="Simpan" /></Page>, 400);
-  const x = v.value;
-  await c.env.DB.prepare("INSERT INTO claims (user_id, category, amount, claim_date, merchant, note) VALUES (?, ?, ?, ?, ?, ?)")
-    .bind(c.get("user").id, x.category, x.amount, x.claim_date, x.merchant, x.note).run();
+  const r = await claimService(c.env).create(c.get("user"), f);
+  if (!r.ok) return c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" v={f} error={r.error} button="Simpan" /></Page>, 400);
   return c.redirect("/");
 });
 
 // Edit, ubah status, dan hapus: khusus admin
 const adminOnly = async (c: any, next: any) => (c.get("user").role === "admin" ? next() : c.text("Khusus admin", 403));
 web.get("/claims/:id/edit", adminOnly, async (c) => {
-  const r = await c.env.DB.prepare("SELECT * FROM claims WHERE id = ?").bind(Number(c.req.param("id"))).first();
+  const r = await claimService(c.env).findById(Number(c.req.param("id")));
   if (!r) return c.notFound();
   return c.html(<Page title="Edit klaim" user={c.get("user")}><h1>Edit klaim #{r.id}</h1><ClaimForm action={`/claims/${r.id}/edit`} v={r} button="Simpan perubahan" /></Page>);
 });
 web.post("/claims/:id/edit", adminOnly, async (c) => {
   const id = Number(c.req.param("id"));
   const f = await c.req.parseBody() as Record<string, unknown>;
-  const v = validateClaim(f);
-  if (!v.ok) return c.html(<Page title="Edit klaim" user={c.get("user")}><h1>Edit klaim #{id}</h1><ClaimForm action={`/claims/${id}/edit`} v={f} error={v.error} button="Simpan perubahan" /></Page>, 400);
-  const x = v.value;
-  await c.env.DB.prepare("UPDATE claims SET category = ?, amount = ?, claim_date = ?, merchant = ?, note = ? WHERE id = ?")
-    .bind(x.category, x.amount, x.claim_date, x.merchant, x.note, id).run();
+  const r = await claimService(c.env).update(id, f);
+  if (!r.ok) return c.html(<Page title="Edit klaim" user={c.get("user")}><h1>Edit klaim #{id}</h1><ClaimForm action={`/claims/${id}/edit`} v={f} error={r.error} button="Simpan perubahan" /></Page>, 400);
   return c.redirect("/");
 });
 web.post("/claims/:id/status", adminOnly, async (c) => {
-  const status = String((await c.req.parseBody()).status);
-  if (!["approved", "rejected"].includes(status)) return c.text("status tidak valid", 400);
-  await c.env.DB.prepare("UPDATE claims SET status = ? WHERE id = ? AND status = 'submitted'").bind(status, Number(c.req.param("id"))).run();
+  const r = await claimService(c.env).decide(Number(c.req.param("id")), String((await c.req.parseBody()).status));
+  if (!r.ok) return c.text(r.error, r.code);
   return c.redirect("/");
 });
 web.post("/claims/:id/delete", adminOnly, async (c) => {
-  const id = Number(c.req.param("id"));
-  const r = await c.env.DB.prepare("SELECT receipt_key FROM claims WHERE id = ?").bind(id).first<{ receipt_key: string | null }>();
-  if (r?.receipt_key) await c.env.RECEIPTS.delete(r.receipt_key);
-  await c.env.DB.prepare("DELETE FROM claims WHERE id = ?").bind(id).run();
+  await claimService(c.env).remove(Number(c.req.param("id")));
   return c.redirect("/");
 });
 
 // Foto struk dari R2: pemilik klaim atau admin
 web.get("/receipts/:id", async (c) => {
-  const user = c.get("user");
-  const r = await c.env.DB.prepare("SELECT user_id, receipt_key FROM claims WHERE id = ?").bind(Number(c.req.param("id"))).first<{ user_id: number; receipt_key: string | null }>();
-  if (!r?.receipt_key || (user.role !== "admin" && r.user_id !== user.id)) return c.notFound();
-  const obj = await c.env.RECEIPTS.get(r.receipt_key);
+  const obj = await claimService(c.env).receiptFor(c.get("user"), Number(c.req.param("id")));
   if (!obj) return c.notFound();
-  return new Response(obj.body, { headers: { "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream" } });
+  return new Response(obj.body, { headers: { "Content-Type": obj.contentType } });
 });
 
 // ---------- token pribadi untuk Claude (MCP) ----------
