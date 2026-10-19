@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ops-finance__list_my_claims",
+      "Bash(npm test)"
+    ],
+    "ask": [
+      "mcp__ops-finance__create_claim",
+      "mcp__ops-finance__upload_receipt"
+    ],
+    "deny": [
+      "Read(./.dev.vars)",
+      "Bash(npx wrangler * --remote *)"
+    ]
+  }
+}
