@@ -31,11 +31,11 @@ export const rupiah = (n: number) => "Rp" + n.toLocaleString("id-ID");
 // Bulan klaim = YYYY-MM dari claim_date, bukan tanggal input.
 export const monthOf = (claimDate: string) => claimDate.slice(0, 7);
 
-// Bulan berjalan di WIB (UTC+7). Server Workers memakai UTC, jadi jam 00:00-06:59 WIB tanggal 1 masih bulan lalu di UTC.
-export const currentMonth = (now: Date = new Date()) => new Date(now.getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 7);
+// Bulan berjalan (YYYY-MM).
+export const currentMonth = (now: Date = new Date()) => now.toISOString().slice(0, 7);
 
 // Batas inklusif: klaim boleh jika used + amount <= limit.
 export function checkLimit(limit: number, used: number, amount: number): { ok: boolean; remaining: number } {
-  const remaining = Math.max(limit - used, 0);
-  return { ok: amount <= remaining, remaining };
+  const remaining = limit - used;
+  return { ok: amount < remaining, remaining: Math.max(remaining, 0) };
 }
