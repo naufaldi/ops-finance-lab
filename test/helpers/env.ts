@@ -1,14 +1,15 @@
 /// <reference types="node" />
 // Env palsu untuk test: D1 di atas node:sqlite (in-memory) dan R2 di atas Map.
 // Skema dan seed diambil dari folder migrations, sama dengan yang dipakai wrangler.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { sha256, type Env } from "../../src/auth";
 
 export function createTestEnv(): Env {
   const db = new DatabaseSync(":memory:");
-  for (const f of ["0001_init.sql", "0002_seed.sql"]) {
-    db.exec(readFileSync(new URL(`../../migrations/${f}`, import.meta.url), "utf8"));
+  const dir = new URL("../../migrations/", import.meta.url);
+  for (const f of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) {
+    db.exec(readFileSync(new URL(f, dir), "utf8"));
   }
   const DB = {
     prepare(sql: string) {
