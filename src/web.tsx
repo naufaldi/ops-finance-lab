@@ -3,7 +3,7 @@ import type { Child } from "hono/jsx";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { hashPassword, randomToken, requireSession, sha256, type AppEnv } from "./auth";
 import { claimService } from "./claims";
-import { CATEGORIES, currentMonth, rupiah } from "./claims/claim";
+import { CATEGORIES, currentMonth, rupiah, type LimitStatus } from "./claims/claim";
 
 export const web = new Hono<AppEnv>();
 
@@ -101,10 +101,7 @@ web.get("/", async (c) => {
       {user.role === "sales" && (
         <>
           <h2 style="font-size:16px">Sisa plafon {month}</h2>
-          <table style="margin-bottom:18px">
-            <tr><th>Kategori</th><th>Plafon</th><th>Terpakai</th><th>Sisa</th></tr>
-            {limits.map((l) => <tr><td>{LABEL[l.category]}</td><td>{rupiah(l.limit)}</td><td>{rupiah(l.used)}</td><td><b>{rupiah(l.remaining)}</b></td></tr>)}
-          </table>
+          <LimitTable limits={limits} />
         </>
       )}
       <table>
@@ -132,6 +129,15 @@ web.get("/", async (c) => {
     </Page>,
   );
 });
+
+function LimitTable(props: { limits: LimitStatus[] }) {
+  return (
+    <table style="margin-bottom:18px">
+      <tr><th>Kategori</th><th>Plafon</th><th>Terpakai</th><th>Sisa</th></tr>
+      {props.limits.map((l) => <tr><td>{LABEL[l.category]}</td><td>{rupiah(l.limit)}</td><td>{rupiah(l.used)}</td><td><b>{rupiah(l.remaining)}</b></td></tr>)}
+    </table>
+  );
+}
 
 function ClaimForm(props: { action: string; v?: Record<string, any>; error?: string; button: string }) {
   const v = props.v ?? {};
