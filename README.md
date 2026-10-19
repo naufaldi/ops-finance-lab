@@ -7,6 +7,8 @@ Aplikasi klaim biaya Ops Sales untuk lab Sesi 2 dan Sesi 3. Data dummy.
 - `solution`: hasil akhir Lab Sesi 2
 - `sesi3-start`: titik awal Lab Sesi 3 Part 1 (= `solution` + helper test `test/helpers/env.ts`)
 - `sesi3-part1-solution`: hasil Lab Sesi 3 Part 1 (PRD, ARCHITECTURE, TRD, ADR, refactor claims ke layer)
+- `sesi3-part2-start`: titik awal Lab Sesi 3 Part 2 (= tag lab4-selesai)
+- `sesi3-part2-solution`: hasil Lab Sesi 3 Part 2 (plafon, test, E2E, debugging, PR, review, regresi)
 Diuji 19 Okt 2026: Node 22.22, wrangler 4.151, hono 4.13, @modelcontextprotocol/server 2.3.1, Claude Code 2.1.303.
 
 ## Jalankan
