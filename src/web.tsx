@@ -54,8 +54,8 @@ web.get("/login", (c) => c.html(
       <h1>Login</h1>
       {c.req.query("e") && <div class="err">Email atau password salah.</div>}
       <form method="post" action="/login">
-        <label>Email</label><input name="email" value="admin@ops.test" />
-        <label>Password</label><input name="password" type="password" />
+        <label for="email">Email</label><input id="email" name="email" value="admin@ops.test" />
+        <label for="password">Password</label><input id="password" name="password" type="password" />
         <p><button>Masuk</button></p>
       </form>
       <p class="muted">Akun dummy: admin@ops.test, rina@ops.test, budi@ops.test. Password: demo123.</p>
@@ -139,12 +139,12 @@ function ClaimForm(props: { action: string; v?: Record<string, any>; error?: str
     <div class="card">
       {props.error && <div class="err">{props.error}</div>}
       <form method="post" action={props.action}>
-        <label>Kategori</label>
-        <select name="category">{CATEGORIES.map((k) => <option value={k} selected={v.category === k}>{LABEL[k]}</option>)}</select>
-        <label>Nominal (rupiah)</label><input name="amount" value={v.amount ?? ""} />
-        <label>Tanggal</label><input name="claim_date" type="date" value={v.claim_date ?? ""} />
-        <label>Merchant</label><input name="merchant" value={v.merchant ?? ""} />
-        <label>Catatan</label><input name="note" value={v.note ?? ""} />
+        <label for="category">Kategori</label>
+        <select id="category" name="category">{CATEGORIES.map((k) => <option value={k} selected={v.category === k}>{LABEL[k]}</option>)}</select>
+        <label for="amount">Nominal (rupiah)</label><input id="amount" name="amount" value={v.amount ?? ""} />
+        <label for="claim_date">Tanggal</label><input id="claim_date" name="claim_date" type="date" value={v.claim_date ?? ""} />
+        <label for="merchant">Merchant</label><input id="merchant" name="merchant" value={v.merchant ?? ""} />
+        <label for="note">Catatan</label><input id="note" name="note" value={v.note ?? ""} />
         <p><button>{props.button}</button></p>
       </form>
     </div>
