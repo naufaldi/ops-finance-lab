@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "id": 2,
+      "category": "makan_klien",
+      "amount": 420000,
+      "claim_date": "2026-10-15",
+      "merchant": "Resto Padang Sederhana",
+      "note": "Makan siang dengan klien",
+      "status": "submitted",
+      "has_receipt": 1
+    },
+    {
+      "id": 1,
+      "category": "transport",
+      "amount": 85000,
+      "claim_date": "2026-10-14",
+      "merchant": "Taksi Biru",
+      "note": "Kunjungan klien Bank A",
+      "status": "approved",
+      "has_receipt": 0
+    }
+  ]
+}
