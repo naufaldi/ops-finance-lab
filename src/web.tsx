@@ -125,7 +125,7 @@ web.get("/", async (c) => {
           </tr>
         ))}
       </table>
-      <p class="muted">{results.length} klaim · total (tanpa yang ditolak) {rupiah(total)}</p>
+      <p class="muted">{results.length} klaim · {results.filter((r) => r.status === "submitted").length} menunggu approval · total (tanpa yang ditolak) {rupiah(total)}</p>
     </Page>,
   );
 });
