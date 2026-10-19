@@ -3,11 +3,10 @@ import type { Child } from "hono/jsx";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { hashPassword, randomToken, requireSession, sha256, type AppEnv } from "./auth";
 import { claimService } from "./claims";
-import { CATEGORIES } from "./claims/claim";
+import { CATEGORIES, currentMonth, rupiah } from "./claims/claim";
 
 export const web = new Hono<AppEnv>();
 
-const rupiah = (n: number) => "Rp" + n.toLocaleString("id-ID");
 const LABEL: Record<string, string> = { transport: "Transport", hotel: "Hotel", makan_klien: "Makan klien", lainnya: "Lainnya" };
 
 const CSS = `
@@ -87,14 +86,27 @@ web.use("/receipts/*", requireSession);
 // Daftar klaim: admin melihat semua, sales hanya miliknya
 web.get("/", async (c) => {
   const user = c.get("user");
-  const results = await claimService(c.env).list(user, c.req.query("status"));
+  const service = claimService(c.env);
+  const results = await service.list(user, c.req.query("status"));
   const total = results.reduce((s, r) => s + (r.status !== "rejected" ? r.amount : 0), 0);
+  const q = c.req.query("month") ?? "";
+  const month = /^\d{4}-\d{2}$/.test(q) ? q : currentMonth();
+  const limits = user.role === "sales" ? await service.limitStatus(user, month) : [];
   return c.html(
     <Page title="Klaim" user={user}>
       <div class="top">
         <h1>{user.role === "admin" ? "Semua klaim" : "Klaim saya"}</h1>
         <span class="muted">Filter: <a href="/">semua</a> · <a href="/?status=submitted">submitted</a> · <a href="/?status=approved">approved</a> · <a href="/?status=rejected">rejected</a></span>
       </div>
+      {user.role === "sales" && (
+        <>
+          <h2 style="font-size:16px">Sisa plafon {month}</h2>
+          <table style="margin-bottom:18px">
+            <tr><th>Kategori</th><th>Plafon</th><th>Terpakai</th><th>Sisa</th></tr>
+            {limits.map((l) => <tr><td>{LABEL[l.category]}</td><td>{rupiah(l.limit)}</td><td>{rupiah(l.used)}</td><td><b>{rupiah(l.remaining)}</b></td></tr>)}
+          </table>
+        </>
+      )}
       <table>
         <tr><th>#</th><th>Tanggal</th>{user.role === "admin" && <th>Sales</th>}<th>Kategori</th><th>Merchant</th><th>Nominal</th><th>Struk</th><th>Status</th>{user.role === "admin" && <th>Aksi</th>}</tr>
         {results.map((r) => (

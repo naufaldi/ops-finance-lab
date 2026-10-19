@@ -15,6 +15,16 @@ function fakes(seed: Claim[] = []) {
     async decide(id, status) { const c = rows.get(id); if (c?.status === "submitted") c.status = status; },
     async remove(id) { rows.delete(id); },
     async setReceiptKey(id, key) { rows.get(id)!.receipt_key = key; },
+    async monthlyTotal(q) {
+      return [...rows.values()].filter((c) => c.user_id === q.userId && c.category === q.category && c.status !== "rejected"
+        && c.claim_date.slice(0, 7) === q.month && c.id !== q.excludeId).reduce((s, c) => s + c.amount, 0);
+    },
+    async monthlyTotals(userId, month) {
+      const out: Record<string, number> = {};
+      for (const c of rows.values()) if (c.user_id === userId && c.status !== "rejected" && c.claim_date.slice(0, 7) === month) out[c.category] = (out[c.category] ?? 0) + c.amount;
+      return out;
+    },
+    async limits() { return { transport: 1_500_000, makan_klien: 2_000_000, hotel: 3_000_000, lainnya: 500_000 }; },
   };
   const store: ReceiptStore = {
     async put(key, body) { files.set(key, body); },
@@ -57,5 +67,13 @@ describe("ClaimService", () => {
     await f.service.remove(1);
     expect(f.files.size).toBe(0);
     expect(f.rows.size).toBe(0);
+  });
+
+  it("create menolak klaim yang melewati plafon dengan code 422 dan detail sisa", async () => {
+    const { service } = fakes([claim({ amount: 1_000_000 })]);
+    const body = { category: "transport", amount: 500_001, claim_date: "2026-10-20", merchant: "Taksi Biru" };
+    const r = await service.create(rina, body);
+    expect(r).toMatchObject({ ok: false, code: 422, limit: { limit: 1_500_000, used: 1_000_000, remaining: 500_000 } });
+    expect((await service.create(rina, { ...body, amount: 500_000 })).ok).toBe(true);
   });
 });

@@ -9,6 +9,10 @@ export interface ClaimRepository {
   decide(id: number, status: Decision): Promise<void>; // hanya mengubah klaim berstatus submitted
   remove(id: number): Promise<void>;
   setReceiptKey(id: number, key: string): Promise<void>;
+  // Plafon: total klaim non-rejected milik user di satu kategori dan bulan (YYYY-MM). excludeId dipakai saat edit.
+  monthlyTotal(q: { userId: number; category: string; month: string; excludeId?: number }): Promise<number>;
+  monthlyTotals(userId: number, month: string): Promise<Record<string, number>>;
+  limits(): Promise<Record<string, number>>;
 }
 
 export interface ReceiptStore {
