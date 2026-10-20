@@ -60,10 +60,11 @@ Branch `main` berisi starter: konfigurasi, data seed, struk dummy, dan `.mcp.jso
 
 Login Web App: `admin@ops.test` (admin finance), `rina@ops.test` dan `budi@ops.test` (sales), password `demo123`.
 
-Peserta yang tertinggal dapat mencocokkan hasilnya dengan branch `solution`, atau melanjutkan dari branch tersebut:
+Peserta yang tertinggal dapat mencocokkan hasilnya dengan branch `solution`, atau melanjutkan dari branch tersebut. Opsi `-u` ikut menyimpan file baru, termasuk `package-lock.json` dari `npm install`:
 
-    git stash
+    git stash -u
     git checkout -b lanjut-bagian-g solution
+    npm install
 
 ## Sesi 3: branch per lab
 
@@ -82,7 +83,7 @@ Contoh:
     git checkout sesi3-part2-start          # branch
     git checkout -b lanjut lab6-selesai     # tag: buat branch baru dari tag
 
-Peserta yang tertinggal satu lab menyimpan pekerjaannya (`git stash`), lalu membuat branch baru dari tag `labN-selesai` lab sebelumnya.
+Peserta yang tertinggal satu lab menyimpan pekerjaannya (`git stash -u`), lalu membuat branch baru dari tag `labN-selesai` lab sebelumnya.
 
 ## Semua branch
 
