@@ -2,3 +2,5 @@ node_modules/
 build/
 __pycache__/
 .venv/
+# Tidak di-track supaya pindah branch dari main tidak bentrok
+package-lock.json
