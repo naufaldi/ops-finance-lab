@@ -1,0 +1,23 @@
+{
+  "name": "atm-fleet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP Server read-only untuk data kas ATM (data dummy). Sesi 2 Part 2 Bagian F.",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "db:seed": "tsx scripts/seed.ts",
+    "start": "tsx server.ts",
+    "test": "tsx --test test/*.test.ts",
+    "inspect": "npx @modelcontextprotocol/inspector npx tsx server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15"
+  }
+}

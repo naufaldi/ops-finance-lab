@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": ["mcp__atm-fleet__*"],
+    "deny": [
+      "Bash(sqlite3 *)",
+      "Read(./data/**)",
+      "Edit(./data/**)"
+    ]
+  }
+}
