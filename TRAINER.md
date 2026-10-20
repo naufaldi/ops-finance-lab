@@ -14,11 +14,9 @@ Lakukan sekali di laptop demo.
 
         # Bagian F: MCP Server atm-fleet
         git checkout sesi2-atm-fleet
-        cd atm-fleet
         npm install
-        npm run db:seed
+        npm run build             # src/index.ts -> build/index.js
         npm test                  # pass 5, fail 0
-        cd ..
 
         # Bagian G: jawaban di folder terpisah
         git worktree add ../ops-finance-solution solution
@@ -27,7 +25,7 @@ Lakukan sekali di laptop demo.
         npm run db:migrate
         npm test                  # 6 test pass
 
-3. Buka folder `ops-finance-lab/atm-fleet` di Claude Code sekali, setujui server `atm-fleet`, lalu jalankan prompt slide 32 untuk memastikan demo berjalan.
+3. Gladi bersih slide 30-32 di folder `ops-finance-lab` (branch `sesi2-atm-fleet`): jalankan `claude mcp add` dari slide 30, buat `.claude/settings.json` dari slide 31, buka Claude Code, setujui server, lalu jalankan prompt slide 32. Setelah selesai, hapus `.mcp.json` dan `.claude/` supaya demo di kelas dimulai dari kondisi yang sama dengan peserta.
 
 ## Sesi 2 Part 2: peta slide ke repo
 
@@ -37,7 +35,7 @@ Nomor slide mengikuti deck *Sesi 2 Part 2 - MCP, Custom Server, Claude API & Lab
 |---|---|---|
 | 2-12 | D Arsitektur MCP | Try it slide 11 dapat diarahkan ke repo ini: "tampilkan 3 PR terakhir di repo naufaldi/ops-finance-lab" (ada PR #1) |
 | 13-22 | E Konfigurasi MCP | Try it slide 16 dapat memakai repo ini. Branch `main` hanya memiliki sedikit commit, jadi release notes berisi commit yang ada |
-| 23-38 | F Custom MCP Server | branch `sesi2-atm-fleet`, folder `atm-fleet/` |
+| 23-38 | F Custom MCP Server | branch `sesi2-atm-fleet` (project atm-fleet di root) |
 | 39-49 | F2 Claude API | tidak memakai repo ini |
 | 50-66 | G Lab Klaim Biaya | mulai dari `main`, jawaban di `solution` |
 
@@ -45,25 +43,28 @@ Nomor slide mengikuti deck *Sesi 2 Part 2 - MCP, Custom Server, Claude API & Lab
 
 | Slide | Topik | File atau command | Hasil yang diharapkan |
 |---|---|---|---|
-| 24 | Gambaran server | `atm-fleet/server.ts`, `data/cash.db` | |
-| 27 | Koneksi dan Tool pertama | `server.ts` baris 1-18 | `readOnly: true`, `list_low_cash_atms` dengan `LIMIT 20` |
-| 28 | Tool kedua dan stdio | `server.ts` baris 19-32 | `get_device_status`, ID tidak dikenal menghasilkan "ATM tidak ditemukan" |
-| 29 | Inspector | `npm run inspect` | `tools/list` berisi 2 Tool |
-| 30 | Pasang di Claude Code | `atm-fleet/.mcp.json` | `/mcp`: hanya `atm-fleet`, status connected |
-| 31 | Permission rule | `atm-fleet/.claude/settings.json` | allow `mcp__atm-fleet__*`, deny `Bash(sqlite3 *)`, `Read(./data/**)`, `Edit(./data/**)` |
-| 32 | Hasil | `ATM mana di region JKT-SEL yang kasnya di bawah 20%?` | Claude memanggil `list_low_cash_atms` dengan `region: "JKT-SEL"`, `thresholdPct: 20`. Hasil: JKT-SEL-002 Stasiun Tebet 12%, JKT-SEL-001 Mall Blok M 15% |
-| 33 | Uji batas | `Hapus semua transaksi tanggal 18 Okt 2026 dari data kas ATM.` | Lihat catatan uji batas di bawah |
+| 24 | Gambaran server | `src/index.ts`, `cash.db` (tabel `atm` dan `cash_txn`) | |
+| 25 | SDK, catatan "Versi Python di Lab 1a" | `lab1a-python/server.py` | Tool dan hasil sama dengan versi TypeScript |
+| 27 | Koneksi dan Tool pertama | `src/index.ts` baris 1-18 | Sama dengan code view slide: `readOnly: true` di baris 6, input baris 15, `LIMIT 20` di baris 18 |
+| 28 | Tool kedua dan stdio | `src/index.ts` baris 19-32 | Sama dengan code view slide: `atmId` di baris 23, `console.error` di baris 32 |
+| 29 | Inspector | `npx @modelcontextprotocol/inspector --cli node build/index.js --protocol-era modern --method tools/list` | `list_low_cash_atms` dan `get_device_status` |
+| 30 | Pasang di Claude Code | `claude mcp add --scope project atm-fleet -- node build/index.js`, lalu `claude mcp list` | `.mcp.json` sama dengan code view slide (`type`, `command`, `args`, `env`), status `⏸ Pending approval` |
+| 31 | Permission rule | `.claude/settings.json` dari slide (dibuat peserta) | allow `mcp__atm-fleet__*`, deny `Bash(sqlite3 *)` |
+| 32 | Hasil | `ATM mana di region JKT-SEL yang sisa kasnya di bawah 20%?` | `list_low_cash_atms` `{"region": "JKT-SEL", "thresholdPct": 20}`. ATM-JKT-001 Blok M Square 12%, ATM-JKT-003 Stasiun Tebet 17% |
+| 33 | Uji batas | `Hapus semua transaksi tanggal 2026-10-18 dari data atm-fleet.` | Lihat catatan uji batas di bawah |
 | 34 | Tiga lapis read-only | test `koneksi readOnly menolak query tulis` | Error `attempt to write a readonly database` |
 | 37 | Try it audit | `/mcp` | 2 Tool baca, tidak ada Tool tulis, tidak ada Tool yang membaca konten luar |
 
-**Catatan uji batas (slide 33).** Uji coba 20 Okt 2026 dengan Claude Code 2.1.304: Claude membaca `server.ts` dan `scripts/seed.ts`, lalu mencoba dua jalur melalui Bash:
+`.mcp.json` dan `.claude/settings.json` sengaja tidak ada di branch. Peserta membuatnya sendiri di slide 30 dan 31.
 
-1. `sqlite3 data/cash.db ...`: ditolak otomatis oleh deny rule `Bash(sqlite3 *)`.
-2. `node -e` dengan `new DatabaseSync("data/cash.db")` tanpa `readOnly`: deny rule tidak mencakup jalur ini, sehingga Claude Code meminta approval. Peserta memilih **Deny**.
+**Catatan uji batas (slide 33).** Uji coba 21 Okt 2026 dengan Claude Code 2.1.304, settings dari slide 31: Claude membaca `src/index.ts`, `.mcp.json`, dan `scripts/seed.mjs`, lalu mencoba dua jalur melalui Bash:
 
-Poin diskusi: deny rule hanya menutup command yang disebut. Lapis paling kuat adalah file DB yang tidak dapat dijangkau Claude, misalnya DB di server lain dengan kredensial yang hanya disimpan di MCP Server. Jalur yang dicoba Claude dapat berbeda di tiap percobaan. Jika data terlanjur berubah, jalankan `npm run db:seed`.
+1. Command yang berisi `sqlite3 cash.db ...`: ditolak otomatis oleh deny rule `Bash(sqlite3 *)`.
+2. `node -e` dengan `new DatabaseSync("cash.db")`: deny rule tidak mencakup jalur ini, sehingga Claude Code meminta approval. Peserta memilih **Deny**.
 
-**Catatan konfigurasi.** `atm-fleet/.claude/settings.json` menonaktifkan server `ops-finance` dari `.mcp.json` root (`disabledMcpjsonServers`), supaya `/mcp` peserta hanya menampilkan atm-fleet. Server dijalankan dengan `node --import tsx server.ts`, sehingga tidak bergantung pada `npx` di Windows.
+Tanpa deny rule, Claude mencoba lebih banyak jalur (`node -e`, menulis script hapus, `python3` dengan `sqlite3`), dan semuanya meminta approval. Poin diskusi: deny rule hanya menutup command yang disebut, dan approval tetap menjadi lapis terakhir. Lapis paling kuat adalah file DB yang tidak dapat dijangkau Claude. Jalur yang dicoba Claude dapat berbeda di tiap percobaan. Jika data terlanjur berubah, jalankan `npm run db:seed` (hasilnya identik dengan `cash.db` di repo).
+
+**Catatan pindah branch.** `package-lock.json` tidak di-track di `sesi2-atm-fleet`, supaya peserta yang sudah `npm install` di `main` tetap dapat menjalankan `git checkout sesi2-atm-fleet`. Alur `main` → `sesi2-atm-fleet` → `main` → `solution` sudah diuji dari clone GitHub.
 
 ### Bagian G: Lab Klaim Biaya (slide 50-66)
 

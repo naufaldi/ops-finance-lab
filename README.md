@@ -23,19 +23,22 @@ Nomor slide mengikuti deck *Sesi 2 Part 2 - MCP, Custom Server, Claude API & Lab
 | Slide | Bagian | Branch dan folder | Yang dikerjakan |
 |---|---|---|---|
 | 2-22 | D Arsitektur MCP, E Konfigurasi MCP | tidak perlu repo ini | Try it memakai konektor GitHub dan Google Drive di akun masing-masing |
-| 23-38 | F Custom MCP Server | branch `sesi2-atm-fleet`, folder `atm-fleet/` | Menjalankan MCP Server atm-fleet, memasangnya di Claude Code, dan menguji batas read-only |
+| 23-38 | F Custom MCP Server | branch `sesi2-atm-fleet` | Menjalankan MCP Server atm-fleet, memasangnya di Claude Code, dan menguji batas read-only |
 | 39-49 | F2 Claude API | tidak perlu repo ini | Membuat `chatbot.ts` di folder sendiri |
 | 50-66 | G Lab Klaim Biaya | branch `main` | Membangun aplikasi ops-finance bersama Claude Code, langkah 1-11 |
 
 ### Bagian F: atm-fleet (slide 23-38)
 
+Branch `sesi2-atm-fleet` hanya berisi project atm-fleet. Path dan command sama dengan slide: `src/index.ts`, `build/index.js`, dan `cash.db` di root.
+
     git checkout sesi2-atm-fleet
-    cd atm-fleet
     npm install
-    npm run db:seed
+    npm run build          # src/index.ts -> build/index.js
     npm test               # selesai jika pass 5, fail 0
 
-Lalu buka folder `atm-fleet` di Claude Code. Langkah per slide dan kriteria selesai ada di [atm-fleet/README.md](https://github.com/naufaldi/ops-finance-lab/blob/sesi2-atm-fleet/atm-fleet/README.md).
+Lalu ikuti slide 29-33 dari root branch ini. Langkah per slide, kriteria selesai, dan Lab 1a (versi Python) ada di [README branch sesi2-atm-fleet](https://github.com/naufaldi/ops-finance-lab/blob/sesi2-atm-fleet/README.md).
+
+Kembali ke Bagian G dengan `git checkout main`. Folder `build/` dan file `package-lock.json` dari atm-fleet akan muncul di `git status` sebagai file yang tidak di-track. Keduanya dapat diabaikan.
 
 ### Bagian G: Lab Klaim Biaya (slide 50-66)
 
@@ -90,7 +93,7 @@ Peserta yang tertinggal satu lab menyimpan pekerjaannya (`git stash -u`), lalu m
 | Branch | Isi |
 |---|---|
 | `main` | Starter Sesi 2 Bagian G: seed, struk dummy, `.mcp.json`. Aplikasi belum ada |
-| `sesi2-atm-fleet` | `main` + folder `atm-fleet/`: MCP Server read-only data kas ATM untuk Sesi 2 Bagian F |
+| `sesi2-atm-fleet` | Project atm-fleet untuk Sesi 2 Bagian F: MCP Server read-only data kas ATM, `cash.db`, Lab 1a Python |
 | `solution` | Hasil Sesi 2 Bagian G: Web App, API, token, MCP Server ops-finance |
 | `sesi3-start` | `solution` + helper test `test/helpers/env.ts` (D1 di node:sqlite) |
 | `sesi3-part1-solution` | PRD, ARCHITECTURE, TRD, ADR 0001, module `src/claims`, characterization test, `lint:arch` + hook |
