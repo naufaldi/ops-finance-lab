@@ -2,9 +2,10 @@
 // Jalankan ulang kapan saja: file lama dihapus dan dibuat ulang.
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync, rmSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-const DB_PATH = new URL("../data/cash.db", import.meta.url).pathname;
-mkdirSync(new URL("../data/", import.meta.url).pathname, { recursive: true });
+const DB_PATH = fileURLToPath(new URL("../data/cash.db", import.meta.url));
+mkdirSync(fileURLToPath(new URL("../data/", import.meta.url)), { recursive: true });
 rmSync(DB_PATH, { force: true });
 
 const db = new DatabaseSync(DB_PATH);

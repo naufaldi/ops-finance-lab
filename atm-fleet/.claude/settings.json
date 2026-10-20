@@ -6,5 +6,6 @@
       "Read(./data/**)",
       "Edit(./data/**)"
     ]
-  }
+  },
+  "disabledMcpjsonServers": ["ops-finance"]
 }

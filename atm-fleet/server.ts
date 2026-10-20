@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { DatabaseSync } from "node:sqlite";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
-const DB_PATH = process.env.ATM_FLEET_DB ?? new URL("./data/cash.db", import.meta.url).pathname;
+const DB_PATH = process.env.ATM_FLEET_DB ?? fileURLToPath(new URL("./data/cash.db", import.meta.url));
 const db = new DatabaseSync(DB_PATH, { readOnly: true });
 const text = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] });
-
 function createServer() {
   const server = new McpServer({ name: "atm-fleet", version: "0.1.0" });
   server.registerTool("list_low_cash_atms", {

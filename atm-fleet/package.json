@@ -9,7 +9,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "start": "tsx server.ts",
     "test": "tsx --test test/*.test.ts",
-    "inspect": "npx @modelcontextprotocol/inspector npx tsx server.ts"
+    "inspect": "npx @modelcontextprotocol/inspector node --import tsx server.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.3.1",

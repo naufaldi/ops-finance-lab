@@ -3,17 +3,18 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { DatabaseSync } from "node:sqlite";
+import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 const client = new Client({ name: "smoke-test", version: "0.1.0" });
 
 const textOf = (r: any) => r.content.map((c: any) => c.text).join("");
 
 before(async () => {
-  execFileSync("npx", ["tsx", "scripts/seed.ts"], { cwd: root, stdio: "ignore" });
-  await client.connect(new StdioClientTransport({ command: "npx", args: ["tsx", "server.ts"], cwd: root, stderr: "ignore" }));
+  execFileSync(process.execPath, ["--import", "tsx", "scripts/seed.ts"], { cwd: root, stdio: "ignore" });
+  await client.connect(new StdioClientTransport({ command: process.execPath, args: ["--import", "tsx", "server.ts"], cwd: root, stderr: "ignore" }));
 });
 after(() => client.close());
 
@@ -44,7 +45,7 @@ test("get_device_status menampilkan transaksi terakhir", async () => {
 });
 
 test("koneksi readOnly menolak query tulis", () => {
-  const db = new DatabaseSync(new URL("../data/cash.db", import.meta.url).pathname, { readOnly: true });
+  const db = new DatabaseSync(fileURLToPath(new URL("../data/cash.db", import.meta.url)), { readOnly: true });
   assert.throws(() => db.exec("DELETE FROM cash_txn"), /attempt to write a readonly database/);
   db.close();
 });

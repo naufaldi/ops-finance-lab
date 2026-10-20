@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "atm-fleet": {
-      "command": "npx",
-      "args": ["tsx", "server.ts"]
+      "command": "node",
+      "args": ["--import", "tsx", "server.ts"]
     }
   }
 }
