@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "atm-fleet": {
-      "command": "node",
-      "args": ["--import", "tsx", "server.ts"]
-    }
-  }
-}
