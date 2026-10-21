@@ -27,3 +27,12 @@ Aplikasi klaim biaya Ops Sales (data dummy, untuk lab).
 - `npm run db:migrate` lalu `npm run dev`
 - `npm test` (Vitest) wajib hijau sebelum commit
 - `npm run lint:arch` cek batas import modul claims
+
+## Commit dan PR
+- Pesan commit: Conventional Commits, `<type>(<scope>): <deskripsi>`, judul maksimal 50 karakter, body menjelaskan kenapa.
+- Satu commit satu perubahan logis. Refactor dan fitur di commit terpisah.
+- PR memakai `.github/pull_request_template.md`. Semua bagian diisi; bagian "Kenapa" diambil dari PRD atau issue, jangan dikarang.
+- Sebelum minta review manusia: review PR di sesi baru dengan kriteria KISS, DRY, mudah dibaca, logic sederhana, satu fungsi satu tugas.
+- Sertakan output `npm test` di bagian "Cara test". Jangan menulis "test lulus" tanpa output.
+- Jangan push langsung ke `main`.
+
