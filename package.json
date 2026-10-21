@@ -7,6 +7,7 @@
     "dev": "wrangler dev",
     "db:migrate": "wrangler d1 migrations apply ops-finance --local",
     "test": "vitest run",
+    "lint:arch": "node scripts/lint-arch.mjs",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
