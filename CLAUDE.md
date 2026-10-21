@@ -36,3 +36,8 @@ Aplikasi klaim biaya Ops Sales (data dummy, untuk lab).
 - Sertakan output `npm test` di bagian "Cara test". Jangan menulis "test lulus" tanpa output.
 - Jangan push langsung ke `main`.
 
+## Review
+- `/code-review` lokal membaca file ini, bukan REVIEW.md. Aturan review lengkap untuk Code Review di GitHub ada di REVIEW.md.
+- Endpoint yang menampilkan data lebih dari milik pemilik token wajib cek `role === "admin"`.
+- Uang `INTEGER` rupiah di DB dan JSON API; format "Rp..." hanya di Web App.
+- Klaim `rejected` tidak dihitung ke plafon. Query di dalam loop (N+1) dilaporkan.
