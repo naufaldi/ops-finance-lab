@@ -41,3 +41,8 @@ Aplikasi klaim biaya Ops Sales (data dummy, untuk lab).
 - Endpoint yang menampilkan data lebih dari milik pemilik token wajib cek `role === "admin"`.
 - Uang `INTEGER` rupiah di DB dan JSON API; format "Rp..." hanya di Web App.
 - Klaim `rejected` tidak dihitung ke plafon. Query di dalam loop (N+1) dilaporkan.
+
+## Test dan regresi
+- `test/__golden__/` adalah golden file. Jangan jalankan `vitest -u` tanpa izin. Jika golden test gagal, perbaiki code dulu.
+- Bug yang diperbaiki selalu dapat test yang gagal sebelum fix (lihat `test/claim.domain.test.ts`).
+- CI (`.github/workflows/test.yml`) wajib hijau sebelum merge: unit, lint:arch, tsc, dan E2E.

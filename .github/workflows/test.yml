@@ -1,0 +1,37 @@
+# Gate regresi: job "unit" dan "e2e" dijadikan required status check di branch protection.
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main, sesi3-part2-solution]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test            # CI=true: Vitest tidak menulis golden file, beda = gagal
+      - run: npm run lint:arch
+      - run: npx tsc --noEmit -p .
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-trace
+          path: test-results/
