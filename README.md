@@ -73,7 +73,9 @@ Peserta yang tertinggal dapat mencocokkan hasilnya dengan branch `solution`, ata
 
 | Sesi · Lab | Branch atau tag awal | Hasil yang benar (untuk dicocokkan) |
 |---|---|---|
-| Sesi 3 Part 1 · Lab 1-4 (PRD, arsitektur, TRD, refactoring) | `sesi3-start` | branch `sesi3-part1-solution`, tag `lab1-selesai` … `lab4-selesai` |
+| Sesi 3 Part 1 · Lab 1 (PRD dan analisis arsitektur) | `sesi3-start` | tag `lab1-selesai` (`docs/PRD.md`, `docs/ARCHITECTURE.md`) |
+| Sesi 3 Part 1 · Lab 2 (TRD, ADR, refactoring module claims) | tag `lab1-selesai` | tag `lab2-selesai` = branch `sesi3-part1-solution` |
+| Sesi 3 Part 1 · contoh hasil Claude Code asli untuk Lab 1-2 | `sesi3-start` | branch `sesi3-part1-claude-run` (diuji 21 Okt 2026) |
 | Sesi 3 Part 2 · Lab 5 langkah 1-3 (implementasi plafon, test, E2E) | `sesi3-part2-start` | branch `lab5-bug` (commit sebelum commit bug) |
 | Sesi 3 Part 2 · Lab 5 langkah 4 (debugging) | `lab5-bug` | tag `lab5-selesai` |
 | Sesi 3 Part 2 · Lab 6 langkah 1 (PR dengan Claude) | tag `lab5-selesai` | branch `lab6-review-base` |
@@ -97,7 +99,8 @@ Peserta yang tertinggal menyimpan pekerjaannya (`git stash -u`), lalu membuat br
 | `solution` | Hasil Sesi 2 Bagian G: Web App, API, token, MCP Server ops-finance |
 | `sesi3-start` | `solution` + helper test `test/helpers/env.ts` (D1 di node:sqlite) |
 | `sesi3-part1-solution` | PRD, ARCHITECTURE, TRD, ADR 0001, module `src/claims`, characterization test, `lint:arch` + hook |
-| `sesi3-part2-start` | Awal Lab 5 (= tag `lab4-selesai` + `.claude/launch.json`) |
+| `sesi3-part1-claude-run` | Hasil Lab 1-2 yang dikerjakan Claude Code 2.1.305 dari prompt template di slide (bukan jawaban resmi; struktur module berbeda dari solusi, test tetap pass) |
+| `sesi3-part2-start` | Awal Lab 5 (= tag `lab2-selesai` + `.claude/launch.json`; tag lama `lab4-selesai` menunjuk commit yang sama) |
 | `lab5-bug` | Awal Lab 5 langkah 4: satu commit berisi dua bug di fitur plafon |
 | `lab6-review`, `lab6-review-base` | PR #2 untuk Lab 6 langkah 2 (`lab6-review` → `lab6-review-base`) |
 | `lab6-regresi` | Awal Lab 6 langkah 3: 6 commit setelah tag `lab6-baik`, satu commit merusak existing behavior |

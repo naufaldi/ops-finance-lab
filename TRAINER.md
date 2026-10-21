@@ -89,3 +89,34 @@ Hasil uji 19 Okt 2026 (Claude Code 2.1.303): `list_my_claims` dengan token Rina 
 ## Sesi 3
 
 Branch dan tag per lab ada di tabel Sesi 3 di [README.md](README.md).
+
+### Sesi 3 Part 1: dua lab (diuji 21 Okt 2026)
+
+Deck Sesi 3 Part 1 memakai dua lab. Commit di branch `sesi3-part1-solution` masih berlabel lama (Lab 1-4); pemetaannya:
+
+| Lab di deck | Commit di `sesi3-part1-solution` | Tag |
+|---|---|---|
+| Lab 1A: PRD | `Lab 1: PRD plafon klaim` | |
+| Lab 1B: analisis arsitektur | `Lab 2: ARCHITECTURE.md kondisi saat ini` | `lab1-selesai` |
+| Lab 2A: TRD dan ADR | `Lab 3: TRD dan ADR 0001` | |
+| Lab 2B: refactoring (4 langkah) | `Lab 4 langkah 1-4` | `lab2-selesai` (alias lama: `lab4-selesai`) |
+
+Uji dengan Claude Code 2.1.305 (headless, model default) dari `sesi3-start`, memakai prompt template di slide yang sudah diisi. Hasil lengkap ada di branch `sesi3-part1-claude-run`.
+
+| Langkah | Waktu Claude | Hasil |
+|---|---|---|
+| 1A PRD (jawaban interview ditulis di prompt) | ±1,5 menit | `docs/PRD.md` 114 baris: aturan bisnis, non-goals, constraint, acceptance criteria, asumsi |
+| 1B Explore → ARCHITECTURE | ±2,5 menit | `docs/ARCHITECTURE.md` 193 baris: container, alur Web App dan MCP, temuan dengan file:baris (mis. `src/api.ts:30`, `src/web.tsx:153`), dampak ke PRD, asumsi |
+| 2A TRD + ADR | ±3,5 menit | `docs/TRD.md` dengan bagian A (refactoring) dan B (plafon, nanti), `docs/adr/0001-claims-feature-module.md` |
+| 2B langkah 1 characterization test | ±1 menit | 44 test pass di code lama, `src/` tidak berubah |
+| 2B langkah 2-3 pindah SQL klaim | ±3 + 2,5 menit | `src/claims/{domain,application,infrastructure}`, 87 test pass, `prepare()` di `api.ts` 0, `web.tsx` 5 (login, token) |
+| 2B langkah 4 rules + hook | ±1,5 menit | CLAUDE.md, `.claude/rules/claims.md`, `npm run lint:arch`, hook PostToolUse; pelanggaran memberi exit 2 |
+
+Setelah lab: `npm test` pass, `tsc` bersih, test lama tidak diubah, `wrangler dev` (login, token, API create/list, upload struk, 404 lintas user, approve admin) dan MCP `list_my_claims` berjalan.
+
+Catatan untuk trainer:
+
+- Tanpa kalimat "pisahkan refactoring dan implementasi plafon", TRD dari Claude mencampur keduanya. Kalimat ini sekarang wajib ada di template prompt Lab 2A.
+- Menulis ke `.claude/` (rules dan settings) selalu meminta izin, juga di mode Accept edits. Peserta memilih Allow.
+- Struktur module hasil peserta bisa berbeda dari solusi (contoh: `application/` vs `claim.service.ts`). Yang dinilai: dependency rule, test lama tidak diubah, test pass, dan pemeriksaan arsitektur lulus.
+
