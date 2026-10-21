@@ -3,19 +3,25 @@
 Aplikasi klaim biaya Ops Sales untuk lab Sesi 2 dan Sesi 3. Data dummy.
 
 ## Branch
+Panduan lengkap "mulai dari branch mana" untuk setiap sesi dan lab ada di README branch `main`.
 - `main`: starter Lab Sesi 2 (Bagian G)
 - `solution`: hasil akhir Lab Sesi 2
 - `sesi3-start`: titik awal Lab Sesi 3 Part 1 (= `solution` + helper test `test/helpers/env.ts`)
-- `sesi3-part1-solution`: hasil Lab Sesi 3 Part 1 (PRD, ARCHITECTURE, TRD, ADR, refactor claims ke layer)
-- `sesi3-part2-start`: titik awal Lab Sesi 3 Part 2 (= tag lab4-selesai)
-- `sesi3-part2-solution`: hasil Lab Sesi 3 Part 2 (plafon, test, E2E, debugging, PR, review, regresi)
-Diuji 19 Okt 2026: Node 22.22, wrangler 4.151, hono 4.13, @modelcontextprotocol/server 2.3.1, Claude Code 2.1.303.
+- `sesi3-part1-solution`: hasil Lab Sesi 3 Part 1 (PRD, ARCHITECTURE, TRD, ADR, refactoring claims)
+- `sesi3-part2-start`: titik awal Lab 5 (= tag lab4-selesai + `.claude/launch.json`)
+- `lab5-bug`: titik awal Lab 5 langkah 4 (debugging), berisi commit dengan dua bug
+- `lab6-review`: PR #2 yang di-review di Lab 6 langkah 2 (base `lab6-review-base`, jangan di-merge)
+- `lab6-regresi`: titik awal Lab 6 langkah 3, 6 commit setelah tag `lab6-baik`, satu merusak behavior lama
+- `sesi3-part2-solution`: hasil Lab 5 dan Lab 6 (= tag `lab6-selesai`)
+- Tag checkpoint: `lab1-selesai` … `lab4-selesai`, `lab5-selesai`, `lab6-baik`, `lab6-selesai`
+Diuji 21 Okt 2026: Node 22.22, wrangler 4.151, hono 4.13, @modelcontextprotocol/server 2.3.1, Claude Code 2.1.303.
 
 ## Jalankan
     npm install
     npm run db:migrate      # D1 lokal: skema + 3 user dummy (password demo123)
     npm run dev             # http://127.0.0.1:8787
-    npm test                # Vitest
+    npm test                # Vitest (unit + integration)
+    npm run test:e2e        # Playwright, menjalankan wrangler dev sendiri (sekali: npx playwright install chromium)
 
 Login Web App: admin@ops.test (admin), rina@ops.test dan budi@ops.test (sales).
 
