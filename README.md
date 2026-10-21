@@ -74,19 +74,19 @@ Peserta yang tertinggal dapat mencocokkan hasilnya dengan branch `solution`, ata
 | Sesi · Lab | Branch atau tag awal | Hasil yang benar (untuk dicocokkan) |
 |---|---|---|
 | Sesi 3 Part 1 · Lab 1-4 (PRD, arsitektur, TRD, refactoring) | `sesi3-start` | branch `sesi3-part1-solution`, tag `lab1-selesai` … `lab4-selesai` |
-| Sesi 3 Part 2 · Lab 5 (implementasi plafon, test, E2E) | `sesi3-part2-start` | tag `lab5-selesai` |
-| Sesi 3 Part 2 · Lab 6 (debugging) | `lab6-bug` | tag `lab6-selesai` |
-| Sesi 3 Part 2 · Lab 7 (PR dan review dengan Claude) | tag `lab6-selesai` | tag `lab7-selesai` |
-| Sesi 3 Part 2 · Lab 8 (agentic code review) | `lab8-review` (PR #1, jangan di-merge) | tag `lab8-selesai` |
-| Sesi 3 Part 2 · Lab 9 (regression, git bisect, CI) | `lab9-regresi` | tag `lab9-selesai` |
-| Hasil akhir semua lab | | branch `sesi3-part2-solution` |
+| Sesi 3 Part 2 · Lab 5 langkah 1-3 (implementasi plafon, test, E2E) | `sesi3-part2-start` | branch `lab5-bug` (commit sebelum commit bug) |
+| Sesi 3 Part 2 · Lab 5 langkah 4 (debugging) | `lab5-bug` | tag `lab5-selesai` |
+| Sesi 3 Part 2 · Lab 6 langkah 1 (PR dengan Claude) | tag `lab5-selesai` | branch `lab6-review-base` |
+| Sesi 3 Part 2 · Lab 6 langkah 2 (review PR #2) | `lab6-review` (PR #2, jangan di-merge) | tag `lab6-baik` (aturan review) |
+| Sesi 3 Part 2 · Lab 6 langkah 3-5 (regression, git bisect, CI) | `lab6-regresi` | tag `lab6-selesai` |
+| Hasil akhir Sesi 3 | | branch `sesi3-part2-solution` |
 
 Contoh:
 
     git checkout sesi3-part2-start          # branch
-    git checkout -b lanjut lab6-selesai     # tag: buat branch baru dari tag
+    git checkout -b lanjut lab5-selesai     # tag: buat branch baru dari tag
 
-Peserta yang tertinggal satu lab menyimpan pekerjaannya (`git stash -u`), lalu membuat branch baru dari tag `labN-selesai` lab sebelumnya.
+Peserta yang tertinggal menyimpan pekerjaannya (`git stash -u`), lalu membuat branch baru dari branch atau tag awal langkah berikutnya.
 
 ## Semua branch
 
@@ -97,11 +97,11 @@ Peserta yang tertinggal satu lab menyimpan pekerjaannya (`git stash -u`), lalu m
 | `solution` | Hasil Sesi 2 Bagian G: Web App, API, token, MCP Server ops-finance |
 | `sesi3-start` | `solution` + helper test `test/helpers/env.ts` (D1 di node:sqlite) |
 | `sesi3-part1-solution` | PRD, ARCHITECTURE, TRD, ADR 0001, module `src/claims`, characterization test, `lint:arch` + hook |
-| `sesi3-part2-start` | Awal Sesi 3 Part 2 (= tag `lab4-selesai`) |
-| `lab6-bug` | Awal Lab 6: satu commit berisi dua bug di fitur plafon |
-| `lab8-review`, `lab8-base` | PR #1 untuk Lab 8 (`lab8-review` → `lab8-base`) |
-| `lab9-regresi` | Awal Lab 9: 6 commit setelah tag `lab9-baik`, satu commit merusak existing behavior |
-| `sesi3-part2-solution` | Hasil akhir Sesi 3: plafon, test, E2E, PR template, REVIEW.md, golden test, CI |
+| `sesi3-part2-start` | Awal Lab 5 (= tag `lab4-selesai` + `.claude/launch.json`) |
+| `lab5-bug` | Awal Lab 5 langkah 4: satu commit berisi dua bug di fitur plafon |
+| `lab6-review`, `lab6-review-base` | PR #2 untuk Lab 6 langkah 2 (`lab6-review` → `lab6-review-base`) |
+| `lab6-regresi` | Awal Lab 6 langkah 3: 6 commit setelah tag `lab6-baik`, satu commit merusak existing behavior |
+| `sesi3-part2-solution` | Hasil akhir Sesi 3 (= tag `lab6-selesai`): plafon, test, E2E, PR template, REVIEW.md, golden test, CI |
 
 ## Menjalankan aplikasi ops-finance (branch selain `main` dan `sesi2-atm-fleet`)
 
