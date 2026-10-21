@@ -46,3 +46,10 @@ export async function createToken(env: Env, userId: number): Promise<string> {
 export async function claimRow(env: Env, id: number) {
   return env.DB.prepare("SELECT * FROM claims WHERE id = ?").bind(id).first<Record<string, any>>();
 }
+
+// Buat session langsung di DB, seperti POST /login. Mengembalikan header Cookie untuk app.request.
+export async function loginAs(env: Env, userId: number): Promise<string> {
+  const sid = `s_test_${userId}_${Math.random().toString(16).slice(2)}`;
+  await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, datetime('now', '+1 day'))").bind(sid, userId).run();
+  return `sid=${sid}`;
+}
