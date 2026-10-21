@@ -1,4 +1,4 @@
-// Unit test service tanpa D1 dan R2: repository dan storage palsu di memori.
+// Unit test service tanpa D1 dan R2: repository dan storage in-memory (implementasi port di memori).
 import { describe, expect, it } from "vitest";
 import type { Claim } from "../src/claims/claim";
 import { ClaimService } from "../src/claims/claim.service";

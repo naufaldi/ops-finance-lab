@@ -1,5 +1,5 @@
 /// <reference types="node" />
-// Env palsu untuk test: D1 di atas node:sqlite (in-memory) dan R2 di atas Map.
+// Env untuk test: D1 di atas node:sqlite (in-memory) dan R2 di atas Map.
 // Skema dan seed diambil dari folder migrations, sama dengan yang dipakai wrangler.
 import { readdirSync, readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";

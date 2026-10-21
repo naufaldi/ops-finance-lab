@@ -12,7 +12,7 @@ Handler di `web.tsx` dan `api.ts` hanya memanggil `claimService(env)`.
 
 ## Consequences
 - Aturan bisnis klaim ditulis sekali di `claim.service.ts`.
-- Service bisa di-test dengan repository palsu.
+- Service bisa di-test dengan repository in-memory.
 - Lebih banyak file. Batas import dijaga `npm run lint:arch`.
 
 ## Alternatives considered
