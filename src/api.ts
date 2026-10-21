@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { requireScope, requireToken, type AppEnv } from "./auth";
 import { claimService } from "./claims";
+import { currentMonth, rupiah } from "./claims/claim";
 
 // API JSON untuk MCP dan client lain. Semua route wajib token pribadi.
 // Handler hanya membaca request, memanggil service, dan membentuk response.
@@ -34,3 +35,22 @@ api.put("/claims/:id/receipt", requireScope("claims:write"), async (c) => {
   if (!r.ok) return c.json({ error: r.error }, r.code);
   return c.json(r.value);
 });
+
+// Rekap sisa plafon semua sales untuk admin finance. Bulan default: bulan berjalan.
+api.get("/limits/summary", requireScope("claims:read"), async (c) => {
+  const month = c.req.query("month") ?? currentMonth();
+  const { results: users } = await c.env.DB.prepare("SELECT id, name FROM users WHERE role = 'sales'").all<{ id: number; name: string }>();
+  const { results: limits } = await c.env.DB.prepare("SELECT category, monthly_limit FROM claim_limits").all<{ category: string; monthly_limit: number }>();
+  const rows = [];
+  for (const u of users) {
+    for (const l of limits) {
+      const r = await c.env.DB.prepare(
+        `SELECT SUM(amount) AS used FROM claims WHERE user_id = ${u.id} AND category = '${l.category}' AND claim_date LIKE '${month}%'`,
+      ).first<{ used: number | null }>();
+      const used = r?.used ?? 0;
+      rows.push({ sales: u.name, category: l.category, limit: rupiah(l.monthly_limit), used: rupiah(used), remaining: rupiah(l.monthly_limit - used) });
+    }
+  }
+  return c.json({ month, rows });
+});
+
