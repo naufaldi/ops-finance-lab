@@ -31,6 +31,9 @@ export async function requireSession(c: Context<AppEnv>, next: Next) {
   await next();
 }
 
+// Edit, ubah status, dan hapus klaim: khusus admin
+export const adminOnly = async (c: any, next: any) => (c.get("user").role === "admin" ? next() : c.text("Khusus admin", 403));
+
 // API: token pribadi di header Authorization: Bearer <token>
 export async function requireToken(c: Context<AppEnv>, next: Next) {
   const header = c.req.header("Authorization") ?? "";

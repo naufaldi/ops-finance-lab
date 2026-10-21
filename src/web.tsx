@@ -1,51 +1,14 @@
 import { Hono } from "hono";
-import type { Child } from "hono/jsx";
 import { deleteCookie, setCookie } from "hono/cookie";
-import { hashPassword, randomToken, requireSession, sha256, type AppEnv } from "./auth";
-import { CATEGORIES, validateClaim } from "./validate";
+import { adminOnly, hashPassword, randomToken, requireSession, sha256, type AppEnv } from "./auth";
+import { CATEGORIES } from "./claims/domain/claim";
+import { validateClaim } from "./claims/domain/validate-claim";
+import { createClaim, listClaimsWithSales, makeDeps } from "./claims";
+import { Page, rupiah } from "./ui/page";
 
 export const web = new Hono<AppEnv>();
 
-const rupiah = (n: number) => "Rp" + n.toLocaleString("id-ID");
 const LABEL: Record<string, string> = { transport: "Transport", hotel: "Hotel", makan_klien: "Makan klien", lainnya: "Lainnya" };
-
-const CSS = `
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#F5F7FB;color:#1D3D70}
-header{background:#1D3D70;color:#fff;padding:12px 28px;display:flex;justify-content:space-between;align-items:center}
-header b{font-size:17px}header nav a{color:#fff;margin-left:18px;text-decoration:none;font-size:14px}
-main{max-width:980px;margin:24px auto;padding:0 20px}h1{font-size:22px;margin:0 0 14px}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:14px}
-th{background:#F06634;color:#fff;text-align:left;padding:9px 10px}td{padding:9px 10px;border-top:1px solid #E6EAF2}
-.pill{border-radius:12px;padding:2px 9px;font-size:12px;font-weight:600}
-.submitted{background:#FFF3D6;color:#8A5A00}.approved{background:#E6F4EA;color:#1E6B34}.rejected{background:#FDE7E3;color:#B3261E}
-form.inline{display:inline}button,.btn{background:#1D3D70;color:#fff;border:0;border-radius:7px;padding:6px 11px;font-size:13px;cursor:pointer;text-decoration:none}
-button.ok{background:#2E7D32}button.no{background:#B3261E}button.ghost{background:#8A94A3}
-.card{background:#fff;border-radius:10px;padding:18px;max-width:520px}label{display:block;font-size:13px;margin:10px 0 4px}
-input,select{width:100%;padding:8px;border:1px solid #CBD3E1;border-radius:7px;font-size:14px}
-.err{background:#FDE7E3;color:#B3261E;padding:8px 10px;border-radius:7px;margin-bottom:10px}
-.token{font-family:monospace;background:#FFF3D6;padding:10px;border-radius:7px;word-break:break-all}
-.muted{color:#6B7A90;font-size:13px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-`;
-
-function Page(props: { title: string; user?: { name: string; role: string }; children: Child }) {
-  return (
-    <html lang="id">
-      <head><meta charset="utf-8" /><title>{props.title} · Ops Finance</title><style>{CSS}</style></head>
-      <body>
-        <header>
-          <b>Ops Finance · Klaim Biaya Sales</b>
-          {props.user && (
-            <nav>
-              <span>{props.user.name} ({props.user.role})</span>
-              <a href="/">Klaim</a><a href="/claims/new">Ajukan klaim</a><a href="/tokens">Token untuk Claude</a><a href="/logout">Keluar</a>
-            </nav>
-          )}
-        </header>
-        <main>{props.children}</main>
-      </body>
-    </html>
-  );
-}
 
 // ---------- login ----------
 web.get("/login", (c) => c.html(
@@ -86,13 +49,7 @@ web.use("/receipts/*", requireSession);
 // Daftar klaim: admin melihat semua, sales hanya miliknya
 web.get("/", async (c) => {
   const user = c.get("user");
-  const status = c.req.query("status") ?? "";
-  let sql = `SELECT c.*, u.name AS sales FROM claims c JOIN users u ON u.id = c.user_id WHERE 1 = 1`;
-  const params: unknown[] = [];
-  if (user.role !== "admin") { sql += " AND c.user_id = ?"; params.push(user.id); }
-  if (status) { sql += " AND c.status = ?"; params.push(status); }
-  sql += " ORDER BY c.claim_date DESC, c.id DESC";
-  const { results } = await c.env.DB.prepare(sql).bind(...params).all<Record<string, any>>();
+  const results = await listClaimsWithSales(makeDeps(c.env), { viewer: user, status: c.req.query("status") });
   const total = results.reduce((s, r) => s + (r.status !== "rejected" ? r.amount : 0), 0);
   return c.html(
     <Page title="Klaim" user={user}>
@@ -147,16 +104,12 @@ function ClaimForm(props: { action: string; v?: Record<string, any>; error?: str
 web.get("/claims/new", (c) => c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" button="Simpan" /></Page>));
 web.post("/claims/new", async (c) => {
   const f = await c.req.parseBody() as Record<string, unknown>;
-  const v = validateClaim(f);
-  if (!v.ok) return c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" v={f} error={v.error} button="Simpan" /></Page>, 400);
-  const x = v.value;
-  await c.env.DB.prepare("INSERT INTO claims (user_id, category, amount, claim_date, merchant, note) VALUES (?, ?, ?, ?, ?, ?)")
-    .bind(c.get("user").id, x.category, x.amount, x.claim_date, x.merchant, x.note).run();
+  const r = await createClaim(makeDeps(c.env), { viewer: c.get("user"), body: f });
+  if (!r.ok) return c.html(<Page title="Ajukan klaim" user={c.get("user")}><h1>Ajukan klaim</h1><ClaimForm action="/claims/new" v={f} error={r.error} button="Simpan" /></Page>, 400);
   return c.redirect("/");
 });
 
 // Edit, ubah status, dan hapus: khusus admin
-const adminOnly = async (c: any, next: any) => (c.get("user").role === "admin" ? next() : c.text("Khusus admin", 403));
 web.get("/claims/:id/edit", adminOnly, async (c) => {
   const r = await c.env.DB.prepare("SELECT * FROM claims WHERE id = ?").bind(Number(c.req.param("id"))).first();
   if (!r) return c.notFound();

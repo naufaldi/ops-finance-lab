@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { requireScope, requireToken, type AppEnv } from "./auth";
-import { validateClaim } from "./validate";
+import { createClaim, listClaimSummaries, makeDeps } from "./claims";
 
 // API JSON untuk MCP dan client lain. Semua route wajib token pribadi.
 export const api = new Hono<AppEnv>();
@@ -10,28 +10,15 @@ api.get("/me", (c) => c.json(c.get("user")));
 
 // Sales hanya melihat klaim miliknya sendiri. Admin melihat semua.
 api.get("/claims", requireScope("claims:read"), async (c) => {
-  const user = c.get("user");
-  const status = c.req.query("status");
-  let sql = `SELECT id, category, amount, claim_date, merchant, note, status,
-               receipt_key IS NOT NULL AS has_receipt FROM claims WHERE 1 = 1`;
-  const params: unknown[] = [];
-  if (user.role !== "admin") { sql += " AND user_id = ?"; params.push(user.id); }
-  if (status) { sql += " AND status = ?"; params.push(status); }
-  sql += " ORDER BY claim_date DESC LIMIT 50";
-  const { results } = await c.env.DB.prepare(sql).bind(...params).all();
-  return c.json({ claims: results });
+  const claims = await listClaimSummaries(makeDeps(c.env), { viewer: c.get("user"), status: c.req.query("status") });
+  return c.json({ claims });
 });
 
 api.post("/claims", requireScope("claims:write"), async (c) => {
   const body = await c.req.json<Record<string, unknown>>().catch(() => ({}));
-  const v = validateClaim(body);
-  if (!v.ok) return c.json({ error: v.error }, 400);
-  const { category, amount, claim_date, merchant, note } = v.value;
-  const row = await c.env.DB.prepare(
-    `INSERT INTO claims (user_id, category, amount, claim_date, merchant, note)
-     VALUES (?, ?, ?, ?, ?, ?) RETURNING id, status`,
-  ).bind(c.get("user").id, category, amount, claim_date, merchant, note).first();
-  return c.json({ claim: row }, 201);
+  const r = await createClaim(makeDeps(c.env), { viewer: c.get("user"), body });
+  if (!r.ok) return c.json({ error: r.error }, 400);
+  return c.json({ claim: r.claim }, 201);
 });
 
 // Upload foto struk ke R2. Hanya pemilik klaim, hanya PNG/JPEG, maksimal 5 MB.
